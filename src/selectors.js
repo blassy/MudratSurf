@@ -1,21 +1,40 @@
 import { sampleCubic } from './geometry/bezier.js';
 
-// --- TOP VIEW outline control points (quarter outline to midline) ---
-export function outlineQuarterTop(m){
-  // You’ll substitute your exact Bezier scheme later.
-  // This one: tail→mid on one side, then we mirror in the renderer.
-  const p0 = { x: 0,       y: 0.5*m.W_tail };
-  const p1 = { x: 0.12*m.L, y: 0.5*m.W_tail + 0.25*(m.W_max - m.W_tail) };
-  const p2 = { x: 0.40*m.L, y: 0.5*m.W_max };
-  const p3 = { x: 0.50*m.L, y: 0.5*m.W_max };
-  return { p0,p1,p2,p3 };
+// Half outline on the +y side, tail (-L/2, 0) → nose (+L/2, 0)
+// We'll pass through near (0, +W/2). Replace with your exact scheme later.
+export function halfOutlineTop(m) {
+  const L2 = m.L / 2;
+  const W2 = m.W_max / 2;
+
+  // Control points you’ll refine: tail→mid→nose on +y side
+  // Segment 1: tail centerline (-L/2, 0) to mid max (0, W/2)
+  const s1_p0 = { x: -L2, y: 0 };
+  const s1_p1 = { x: -0.35 * L2, y: 0.35 * W2 }; // tweak to taste
+  const s1_p2 = { x: -0.10 * L2, y: 0.85 * W2 };
+  const s1_p3 = { x: 0,         y: W2 };
+
+  // Segment 2: mid max (0, W/2) to nose centerline (+L/2, 0)
+  const s2_p0 = s1_p3;
+  const s2_p1 = { x:  0.10 * L2, y: 0.85 * W2 };
+  const s2_p2 = { x:  0.35 * L2, y: 0.35 * W2 };
+  const s2_p3 = { x:  L2,        y: 0 };
+
+  const seg1 = sampleCubic(s1_p0, s1_p1, s1_p2, s1_p3, 120);
+  const seg2 = sampleCubic(s2_p0, s2_p1, s2_p2, s2_p3, 120);
+
+  // Concatenate, but avoid duplicating the join point
+  const half = [...seg1, ...seg2.slice(1)];
+  return half;
 }
 
-export function sampleTopOutline(m){
-  const { p0,p1,p2,p3 } = outlineQuarterTop(m);
-  const right = sampleCubic(p0,p1,p2,p3,160);       // tail→mid (right side)
-  const left  = right.map(pt => ({ x: pt.x, y: -pt.y })).reverse();
-  return [...left, ...right]; // full outline across centerline
+// Full closed outline: mirror +y half across x-axis to get −y side
+export function fullOutlineTop(m) {
+  const half = halfOutlineTop(m);           // tail→nose along +y
+  const mirrored = half
+    .slice(1, -1)                           // avoid duplicating endpoints
+    .map(({x, y}) => ({ x, y: -y }))        // mirror over x-axis (y→−y)
+    .reverse();                             // go back nose→tail along −y
+  return [...half, ...mirrored, half[0]];   // close loop
 }
 
 // --- SIDE VIEW rocker curve ---
