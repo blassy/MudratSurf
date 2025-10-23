@@ -1,0 +1,91 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* No scrollbars */
+}
+
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;           /* Fixed text size */
+  line-height: 1.4;
+  color: #111;
+  background-color: #fafafa; /* Slightly off-white background */
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 320px 1fr; /* Sidebar | main view column */
+  height: 100vh;
+}
+
+#controls {
+  padding: 18px;
+  border-right: 1px solid #ddd;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  overflow: auto; /* Allow sidebar scroll if needed */
+  background-color: #fff;
+}
+
+#controls label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+#controls input[type="range"] {
+  width: 100%;
+}
+
+#controls .val {
+  color: #555;
+  font-variant-numeric: tabular-nums;
+}
+
+/* === MAIN VIEW COLUMN === */
+.views {
+  display: grid;
+  grid-template-rows: 2fr 1fr 1fr;  /* 50% | 25% | 25% */
+  gap: 12px;
+  padding: 16px 18px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+  min-height: 0;                    /* ensure children can shrink */
+}
+
+/* === INDIVIDUAL VIEW PANEL === */
+.panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto; /* header | canvas | footer */
+  gap: 6px;
+  background-color: #fff;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  padding: 8px 10px 10px 10px;
+  min-height: 0;                    /* critical: allow the middle row to shrink */
+  overflow: hidden;                  /* contain any sub-pixel overflow safely */
+}
+
+
+.panel header {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px; /* Fixed size, no scaling */
+  margin-bottom: 4px;
+}
+
+.panel .row {
+  margin-top: 4px;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #fff;
+  border: none;
+  border-radius: 0;
+  box-sizing: border-box;
+}
